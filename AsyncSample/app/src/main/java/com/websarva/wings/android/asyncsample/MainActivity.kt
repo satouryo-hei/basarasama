@@ -146,14 +146,14 @@ class MainActivity : AppCompatActivity() {
             val rootJSON = JSONObject(_result)
             // 都市名文字列。を取得
             val cityName = rootJSON.getString("name")
-            // 経緯度情報JOSNオブジェクトを取得
+            // 経緯度情報JSONオブジェクトを取得
             val coordJSON = rootJSON.getJSONObject("coord")
             // 緯度情報文字列を取得
             val langitude = coordJSON.getString("lat")
             // 経度情報文字列を取得
             val longitude = coordJSON.getString("lon")
             // 天気情報JSON配列オブジェクトを取得
-            val weatherJSONArray = rootJSON.getJSONArray("wearher")
+            val weatherJSONArray = rootJSON.getJSONArray("weather")
             // 現在の天気情報JSONオブジェクトを取得
             val weatherJSON = weatherJSONArray.getJSONObject(0)
             // 現在の天気情報文字列を取得
