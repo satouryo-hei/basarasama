@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">お天気アプリ</string>
+    <string name="tv_winfo_Title">お天気詳細</string>
+    <string-array name="ls_ja_citylist">
+        <item>札幌</item>
+        <item>東京</item>
+        <item>大阪</item>
+        <item>北見</item>
+        <item>沖縄</item>
+        <item>熊本</item>
+        <item>京都</item>
+        <item>名古屋</item>
+        <item>神戸</item>
+        <item>広島</item>
+    </string-array>
+    <string-array name="ls_ja_Modelist">
+    <item>MODE_NONE</item>
+    <item>MODE_NEXT</item>
+    <item>MODE_PREVIOUS</item>
+</string-array>
+
+    <string name="bt_next">次に行く</string>
+    <string name="bt_previous">前に行く</string>
+
+    <string name="preference_file_key">DataStore</string>
+</resources>
