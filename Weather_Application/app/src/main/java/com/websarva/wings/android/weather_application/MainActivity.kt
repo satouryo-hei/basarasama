@@ -150,8 +150,13 @@ class MainActivity : AppCompatActivity() {
 
             // ルートJSONオブジェクトを生成
             val rootJSON = JSONObject(_result)
+
+            // 都市情報JSONオブジェクトを取得を取得
+            val lCityJSON = rootJSON.getJSONObject("city")
+
             // 都市名文字列。を取得
-            val lCityName = rootJSON.getString("name")
+            val lCityName = lCityJSON.getString("name")
+            Log.i(DEBAG_TAG,"${lCityName}")
             // 天気情報JSON配列オブジェクトを取得
             val lWeatherJSONArray = rootJSON.getJSONArray("weather")
             // 現在の天気情報JSONオブジェクトを取得
