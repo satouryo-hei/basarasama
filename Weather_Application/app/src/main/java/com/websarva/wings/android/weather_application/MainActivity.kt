@@ -2,7 +2,6 @@ package com.websarva.wings.android.weather_application
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -13,6 +12,7 @@ import android.widget.SimpleAdapter
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.HandlerCompat
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -27,57 +27,43 @@ class MainActivity : AppCompatActivity() {
     // クラス内のprivate定数を宣言するために
     companion object {
         // ログに記載するタグ用の文字列
-        private const val DEBAG_TAG = "AsyncSample"
+        private const val DEBAG_TAG = "Debag:API通信"
 
         // お天気情報のURL
-        private const val WEATHERINFO_URL = "https://api.openweathermap.org/data/2.5/weather?lang=ja"
+        private const val WEATHERINFO_URL = "https://api.openweathermap.org/data/2.5/forecast?lat="
 
         // お天気APIにアクセスすするためにAPIキー。
         private const val APP_ID = "76eafa6c7ef6c4b02799cf2857ad6d89"
     }
 
-    // リストビューに表示させるリストデータ。
-    private var _list: MutableList<MutableMap<String, String>> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        _list = createList()
 
-        val lSharedPref = getSharedPreferences(
-            getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        val lSharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
         // "Input"から読み出す
-        val LStr = lSharedPref.getString("DataString", "NoData")
-        val llvCityList = findViewById<ListView>(R.id.lvCityList)
-        val lFrom = arrayOf("name")
-        val lTo = intArrayOf(android.R.id.text1)
-        val lAdapter =
-            SimpleAdapter(this@MainActivity, _list, android.R.layout.simple_list_item_1, lFrom, lTo)
-        llvCityList.adapter = lAdapter
-        llvCityList.onItemClickListener = ListItemClickListener()
+        val lLan = lSharedPref.getString("langitude", "NoData")
+        lLan?.let {
+
+            val lLon = lSharedPref.getString("longitude", "NoData")
+
+            Log.i(DEBAG_TAG,"${lLan}")
+            Log.i(DEBAG_TAG,"${lLon}")
+
+            val urlFull = "$WEATHERINFO_URL${lLan}&lon=${lLon}&appid=$APP_ID"
+            receiveWeatherInfo(urlFull)
+        }
     }
 
+    // 次の画面を表示するためのボタンを押したときの処理
     fun onButtonClick(view: View){
-        //
-        val lIntent = Intent(this@MainActivity,changeActivity::class.java)
-        //
+        // インテントオブジェクトを用意
+        val lIntent = Intent(this@MainActivity,InitActivity::class.java)
+        // アクティビティを起動
         startActivity(lIntent)
     }
 
-
-    // リストビューに表示させる天気ポイントリストデータを生成するメソッド
-    private fun createList(): MutableList<MutableMap<String, String>> {
-        var rList: MutableList<MutableMap<String, String>> = mutableListOf()
-
-        var rCity = mutableMapOf("name" to "大阪", "q" to "Osaka")
-        rList.add(rCity)
-        rCity = mutableMapOf("name" to "神戸", "q" to "kobe")
-        rList.add(rCity)
-        rCity = mutableMapOf("name" to "札幌", "q" to "Sapporo")
-        rList.add(rCity)
-
-        return rList
-    }
 
     @UiThread
     // お天気情報の取得処理を行うメソッド
@@ -120,7 +106,7 @@ class MainActivity : AppCompatActivity() {
                     // HttpURLConnectionオブジェクトからレスポンスデータを取得
                     val stream = it.inputStream
                     // レスポンスデータであるInputStreamを文字列に変換
-                    rResult = is2Stering(stream)
+                    rResult = is2String(stream)
                     // InputStreamオブジェクトを解放
                     stream.close()
                 } catch (ex: SocketTimeoutException) {
@@ -133,7 +119,8 @@ class MainActivity : AppCompatActivity() {
             _handler.post(lPostExecutor)
         }
 
-        private fun is2Stering(stream: InputStream): String {
+        // InputStreamオブジェクトを文字列に変換
+        private fun is2String(stream: InputStream): String {
             val lSb = StringBuilder()
             val rReader = BufferedReader(InputStreamReader(stream, "UTF-8"))
             var rLine = rReader.readLine()
@@ -181,30 +168,6 @@ class MainActivity : AppCompatActivity() {
             tvTempMin.text ="最低気温${lMain.getInt("temp_min")-273}"
             // 最高気温情報文字列を取得、表示 ｛C(摂氏)＝K(ケルビン)-273｝
             tvTempMax.text ="最高気温${lMain.getInt("temp_max")-273}"
-        }
-    }
-
-
-
-    // リストがタップされたときの処理が記述されたリスナクラス
-    private inner class ListItemClickListener : AdapterView.OnItemClickListener {
-        override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-            val item = _list.get(position)
-            val q = item.get("q")
-            q?.let {
-                // "DataStore"という名前でインスタンスを生成
-                val sharedPref = getSharedPreferences(getString(R.string.preference_file_key),
-                    Context.MODE_PRIVATE)
-
-                // 文字列を"Input"に書き込む
-                val editor = sharedPref.edit()
-                editor.putString("DataString", "${q}")
-
-                editor.apply()
-
-                val urlFull = "$WEATHERINFO_URL&q=$q&appid=$APP_ID"
-                receiveWeatherInfo(urlFull)
-            }
         }
     }
 }
