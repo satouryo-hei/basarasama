@@ -1,18 +1,18 @@
 package com.websarva.wings.android.weather_application
 
+import android.R.attr.data
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ListView
-import android.widget.SimpleAdapter
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.HandlerCompat
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -23,12 +23,13 @@ import java.net.SocketTimeoutException
 import java.net.URL
 import java.util.concurrent.Executors
 
+
 class InitActivity : AppCompatActivity() {
 
     // クラス内のprivate定数を宣言するために
     companion object {
         // ログに記載するタグ用の文字列
-        private const val DEBAG_TAG = "Debag:API通信"
+        private const val DEBAG_TAG = "Debag:API通信INIT"
 
         // お天気情報のURL
         private const val WEATHERINFO_URL = "https://api.openweathermap.org/data/2.5/weather?lang=ja"
@@ -37,16 +38,21 @@ class InitActivity : AppCompatActivity() {
         private const val APP_ID = "76eafa6c7ef6c4b02799cf2857ad6d89"
     }
 
-    // リストビューに表示させるリストデータ。
-    private var _list: MutableList<MutableMap<String, String>> = mutableListOf()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_init)
 
-        val lSharedPref = getSharedPreferences(
-            getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        val lSharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+
         // "Input"から読み出す
+        if((lSharedPref.getBoolean("first", false)))
+       {
+           val intent = Intent(this@InitActivity, MainActivity::class.java)
+           startActivity(intent)
+       }
+
+
+
         val llvCityList = findViewById<ListView>(R.id.lsjacitylist)
         llvCityList.onItemClickListener = ListItemClickListener()
     }
@@ -135,7 +141,7 @@ class InitActivity : AppCompatActivity() {
             // 経緯度情報JSONオブジェクトを取得
             val coordJSON = lRootJSON.getJSONObject("coord")
             // 緯度情報文字列を取得
-            val lLangitude = coordJSON.getString("lat")
+            val lLatitude = coordJSON.getString("lat")
             // 経度情報文字列を取得
             val lLongitude = coordJSON.getString("lon")
 
@@ -149,14 +155,18 @@ class InitActivity : AppCompatActivity() {
             val editor = sharedPref.edit()
             editor.putString("CityName", "${lCityName}")
             Log.i(DEBAG_TAG,"都市の名前:${lCityName}")
-            editor.apply()
-            editor.putString("langitude", "${lLangitude}")
-            Log.i(DEBAG_TAG,"経度:${lLangitude}")
-            editor.apply()
+            editor.putString("latitude", "${lLatitude}")
+            Log.i(DEBAG_TAG,"経度:${lLatitude}")
             editor.putString("longitude", "${lLongitude}")
             Log.i(DEBAG_TAG,"緯度:${lLongitude}")
+            editor.putBoolean("first", false)
             editor.apply()
-            finish()
+
+            val intent = Intent(this@InitActivity, MainActivity::class.java)
+            //intent.putExtra("Bool", true)
+            startActivity(intent)
+
+            //finish()
         }
     }
 
@@ -171,7 +181,7 @@ class InitActivity : AppCompatActivity() {
                 val urlFull = "$WEATHERINFO_URL&q=$item&appid=$APP_ID"
                 receiveWeatherInfo(urlFull)
             }
-            Log.i(DEBAG_TAG,"$item")
+            Log.i("${DEBAG_TAG}:Item","${item}")
         }
     }
 

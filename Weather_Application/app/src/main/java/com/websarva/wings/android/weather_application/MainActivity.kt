@@ -6,9 +6,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ListView
-import android.widget.SimpleAdapter
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -27,10 +24,10 @@ class MainActivity : AppCompatActivity() {
     // クラス内のprivate定数を宣言するために
     companion object {
         // ログに記載するタグ用の文字列
-        private const val DEBAG_TAG = "Debag:API通信"
+        private const val DEBAG_TAG = "Debag:API通信MAIN"
 
         // お天気情報のURL
-        private const val WEATHERINFO_URL = "https://api.openweathermap.org/data/2.5/forecast?lat="
+        private const val WEATHERINFO_URL = "https://api.openweathermap.org/data/2.5/forecast?lang=ja"
 
         // お天気APIにアクセスすするためにAPIキー。
         private const val APP_ID = "76eafa6c7ef6c4b02799cf2857ad6d89"
@@ -41,19 +38,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val lSharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-        // "Input"から読み出す
-        val lLan = lSharedPref.getString("langitude", "NoData")
-        lLan?.let {
+      //  val intent = Intent(this@MainActivity, InitActivity::class.java)
+//        startActivity(intent)
 
-            val lLon = lSharedPref.getString("longitude", "NoData")
-
-            Log.i(DEBAG_TAG,"${lLan}")
-            Log.i(DEBAG_TAG,"${lLon}")
-
-            val urlFull = "$WEATHERINFO_URL${lLan}&lon=${lLon}&appid=$APP_ID"
-            receiveWeatherInfo(urlFull)
-        }
+        changeWeatherInfo(true)
     }
 
     // 次の画面を表示するためのボタンを押したときの処理
@@ -133,6 +121,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun changeWeatherInfo(change: Boolean) {
+
+        val lSharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        // "Input"から読み出す
+        val lLan = lSharedPref.getString("latitude", "NoData")
+        lLan?.let {
+
+            val lLon = lSharedPref.getString("longitude", "NoData")
+
+            Log.i(DEBAG_TAG,"${lLan}")
+            Log.i(DEBAG_TAG,"${lLon}")
+
+            val urlFull = "$WEATHERINFO_URL&lat=${lLan}&lon=${lLon}&appid=$APP_ID"
+            receiveWeatherInfo(urlFull)
+        }
+    }
+
     // 非同期でお天気情報を取得した後にUIスレッドでその情報を表示するためのクラス
     private inner class WeatherInfoPostExecutor(result: String) : Runnable {
         // 取得したお天気情報JSON文字列。
@@ -149,24 +154,32 @@ class MainActivity : AppCompatActivity() {
             val tvTempMax = findViewById<TextView>(R.id.tvTempMax)
 
             // ルートJSONオブジェクトを生成
-            val rootJSON = JSONObject(_result)
+            val lRootJSON = JSONObject(_result)
+
+            // 天気情報JSON配列オブジェクトを取得
+            val lRootJSONArray = lRootJSON.getJSONArray("list")
+            // 天気情報JSON配列オブジェクトを取得
+            val lRootJSONArrayAny = lRootJSONArray.getJSONObject(0)
+
 
             // 都市情報JSONオブジェクトを取得を取得
-            val lCityJSON = rootJSON.getJSONObject("city")
+            val lCityJSON = lRootJSON.getJSONObject("city")
 
             // 都市名文字列。を取得
             val lCityName = lCityJSON.getString("name")
             Log.i(DEBAG_TAG,"${lCityName}")
             // 天気情報JSON配列オブジェクトを取得
-            val lWeatherJSONArray = rootJSON.getJSONArray("weather")
+            val lWeatherJSONArray = lRootJSONArrayAny.getJSONArray("weather")
             // 現在の天気情報JSONオブジェクトを取得
-            val lWeatherJSON = lWeatherJSONArray.getJSONObject(0)
+            val lWeatherIndex = lWeatherJSONArray.getJSONObject(0)
             // 現在の天気情報文字列を取得
-            val lWeather = lWeatherJSON.getString("description")
+            val lWeather = lWeatherIndex.getString("description")
+            Log.i(DEBAG_TAG,"${lWeather}")
+
             // 気温情報JSONオブジェクトを取得
-            val lMain = rootJSON.getJSONObject("main")
+            val lMain = lRootJSONArrayAny.getJSONObject("main")
             // 天気情報を表示
-            tvWeatherTelop.text = "${lCityName}に天気"
+            tvWeatherTelop.text = "${lCityName}の天気"
             tvWeatherDesc.text = "現在は${lWeather}です。"
             tvTemp.text = "現在の気温${lMain.getInt("temp")-273}"
             // 最低気温情報文字列を取得、表示｛C(摂氏)＝K(ケルビン)-273｝
