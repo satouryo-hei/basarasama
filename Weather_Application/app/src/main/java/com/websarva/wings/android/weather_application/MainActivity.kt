@@ -7,6 +7,7 @@ import android.os.Handler
 import android.util.Log
 import android.view.View
 import android.widget.ListView
+import android.widget.SimpleAdapter
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -33,6 +34,9 @@ class MainActivity : AppCompatActivity() {
 
         // お天気APIにアクセスすするためにAPIキー。
         private const val APP_ID = "76eafa6c7ef6c4b02799cf2857ad6d89"
+
+        // 回す回数
+        private const val WAILE_NUM = 10
     }
 
 
@@ -145,6 +149,9 @@ class MainActivity : AppCompatActivity() {
         // 取得したお天気情報JSON文字列。
         private val _result = result
 
+        // リストビューに表示させるリストデータ。(天気リストデータ)
+        private var _Citylist: MutableList<MutableMap<String, String>> = mutableListOf()
+
         @UiThread
         override fun run() {
             // ここにUIスレッドを行う処理コードを記述
@@ -154,10 +161,7 @@ class MainActivity : AppCompatActivity() {
             val tvTemp = findViewById<TextView>(R.id.tvTemp)
             val tvTempMin = findViewById<TextView>(R.id.tvTempMin)
             val tvTempMax = findViewById<TextView>(R.id.tvTempMax)
-
             var llvWeatherList = findViewById<ListView>(R.id.lvWeather)
-            var lveWeather= findViewById<TextView>(R.id.lveWeather)
-            var a = ""
 
             // ルートJSONオブジェクトを生成
             val lListJSON = JSONObject(_result)
@@ -187,11 +191,11 @@ class MainActivity : AppCompatActivity() {
             // 天気情報を表示
             tvWeatherDesc.text = "現在は${lNowWeather}です。"
 
-            var i = 0
-            while (i<10) {
-                Log.i("ai", "${i}")
+            var rCountInt = 0
+            while (rCountInt<WAILE_NUM) {
+                Log.i("ai", "${rCountInt}")
                 // 天気情報JSON配列オブジェクトを取得
-                val lListJSONArrayRoot = lListJSONArray.getJSONObject(i)
+                val lListJSONArrayRoot = lListJSONArray.getJSONObject(rCountInt)
                 // 天気情報JSON配列オブジェクトを取得
                 val lWeatherJSONArrayList = lListJSONArrayRoot.getJSONArray("weather")
                 // 現在の天気情報JSONオブジェクトを取得(配列の0番目を取得)
@@ -199,16 +203,21 @@ class MainActivity : AppCompatActivity() {
                 // 現在の天気情報文字列を取得
                 val lWeather = lWeatherArray.getString("description")
 
-                a += lWeather
-                if (i==0) {
-                    lveWeather.text = "現在は${a}"
-                    Log.i(DEBAG_TAG, "初回:${lWeather}")
-                }
-                else{
-                    lveWeather.text = "\n${a}"
-                    Log.i(DEBAG_TAG, "${i}回目:${lWeather}")
-                }
-                ++i
+                val city = mutableMapOf("name" to "${lWeather}","comment" to "${rCountInt+1}時間後")
+                _Citylist.add(city)
+
+                val from = arrayOf("name","comment")
+                val to = intArrayOf(android.R.id.text1,android.R.id.text2)
+                val lCityadapter = SimpleAdapter(
+                    this@MainActivity,
+                    _Citylist,
+                    android.R.layout.simple_list_item_2,
+                    from,
+                    to
+                )
+                llvWeatherList.adapter = lCityadapter
+
+                ++rCountInt
             }
             // 気温情報JSONオブジェクトを取得
             val lMain = lListJSONArrayZero.getJSONObject("main")
@@ -218,6 +227,7 @@ class MainActivity : AppCompatActivity() {
             tvTempMin.text = "最低気温${lMain.getInt("temp_min") - 273}"
             // 最高気温情報文字列を取得、表示 ｛C(摂氏)＝K(ケルビン)-273｝
             tvTempMax.text = "最高気温${lMain.getInt("temp_max") - 273}"
+
         }
     }
 }

@@ -39,6 +39,7 @@ class TopActivity : AppCompatActivity() {
         setContentView(R.layout.activity_top)
 
         _Citylist = createCityList()
+        Log.i(DEBAG_TAG, "Citylist:${_Citylist}")
         val lvCityList = findViewById<ListView>(R.id.lvSelectWeather)
         val lvTodayWeatherList = findViewById<ListView>(R.id.lvDisplayWeather)
         val from = arrayOf("name")

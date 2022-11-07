@@ -193,7 +193,7 @@ class InitActivity : AppCompatActivity() {
             // 文字列を"Input"に書き込む
             val editor = sharedPref.edit()
             editor.putString("q", "${item}")
-
+            editor.apply()
         }
     }
 }
