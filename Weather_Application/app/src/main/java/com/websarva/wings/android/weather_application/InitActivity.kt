@@ -36,6 +36,9 @@ class InitActivity : AppCompatActivity() {
 
         // お天気APIにアクセスすするためにAPIキー。
         private const val APP_ID = "76eafa6c7ef6c4b02799cf2857ad6d89"
+
+        // データ取得時間
+        private const val TIMEOUT = 1000
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +57,7 @@ class InitActivity : AppCompatActivity() {
 
 
         val llvCityList = findViewById<ListView>(R.id.lsjacitylist)
-        llvCityList.onItemClickListener = ListItemClickListener()
+        llvCityList.onItemClickListener = ListInitClickListener()
     }
 
 
@@ -89,9 +92,9 @@ class InitActivity : AppCompatActivity() {
             lCon?.let {
                 try {
                     // 接続に使ってよい時間を設定
-                    it.connectTimeout = 1000
+                    it.connectTimeout = TIMEOUT
                     // データ取得に使ってもよい時間。
-                    it.readTimeout = 1000
+                    it.readTimeout = TIMEOUT
                     // HTTP接続メソッドをGETに設定
                     it.requestMethod
                     // 接続
@@ -174,7 +177,7 @@ class InitActivity : AppCompatActivity() {
 
 
     // リストがタップされたときの処理が記述されたリスナクラス
-    private inner class ListItemClickListener : AdapterView.OnItemClickListener {
+    private inner class ListInitClickListener : AdapterView.OnItemClickListener {
         override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
             val Text = view as TextView
             val item = Text.text.toString()

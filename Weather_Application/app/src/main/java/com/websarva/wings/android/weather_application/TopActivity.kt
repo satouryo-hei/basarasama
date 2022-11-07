@@ -41,7 +41,6 @@ class TopActivity : AppCompatActivity() {
         _Citylist = createCityList()
         Log.i(DEBAG_TAG, "Citylist:${_Citylist}")
         val lvCityList = findViewById<ListView>(R.id.lvSelectWeather)
-        val lvTodayWeatherList = findViewById<ListView>(R.id.lvDisplayWeather)
         val from = arrayOf("name")
         val to = intArrayOf(android.R.id.text1)
         val lCityadapter = SimpleAdapter(

@@ -33,6 +33,9 @@ class changeActivity : AppCompatActivity() {
 
         // お天気APIにアクセスすするためにAPIキー。
         private const val APP_ID = "76eafa6c7ef6c4b02799cf2857ad6d89"
+
+        // データ取得時間
+        private const val TIMEOUT = 1000
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,14 +43,15 @@ class changeActivity : AppCompatActivity() {
         setContentView(R.layout.activity_change)
 
         val lSharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-
+        val lTvSelection =  findViewById<TextView>(R.id.tvSelection)
         // "Input"から読み出す
         if((lSharedPref.getBoolean("first", false)))
         {
             val intent = Intent(this@changeActivity, MainActivity::class.java)
             startActivity(intent)
         }
-
+        val NowSelect = lSharedPref.getString("CityName", "NoData")
+        lTvSelection.text = "現在選択中の都市:${NowSelect}"
         val llvCityList = findViewById<ListView>(R.id.lscitylist)
         llvCityList.onItemClickListener = ListItemClickListener()
     }
@@ -84,9 +88,9 @@ class changeActivity : AppCompatActivity() {
             lCon?.let {
                 try {
                     // 接続に使ってよい時間を設定
-                    it.connectTimeout = 1000
+                    it.connectTimeout = TIMEOUT
                     // データ取得に使ってもよい時間。
-                    it.readTimeout = 1000
+                    it.readTimeout = TIMEOUT
                     // HTTP接続メソッドをGETに設定
                     it.requestMethod
                     // 接続

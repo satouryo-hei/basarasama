@@ -35,17 +35,21 @@ class MainActivity : AppCompatActivity() {
         // お天気APIにアクセスすするためにAPIキー。
         private const val APP_ID = "76eafa6c7ef6c4b02799cf2857ad6d89"
 
+        // 初期化の数
+        private const val INIT_NUM = 0
+        // データ取得時間
+        private const val TIMEOUT = 1000
         // 回す回数
-        private const val WAILE_NUM = 10
+        private const val WAILE_NUM = 11
+        // 摂氏へ変化するときの数
+        private const val KELVIN_DIFF = 273
+
     }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-      //  val intent = Intent(this@MainActivity, InitActivity::class.java)
-//        startActivity(intent)
 
         changeWeatherInfo(true)
     }
@@ -90,9 +94,9 @@ class MainActivity : AppCompatActivity() {
             lCon?.let {
                 try {
                     // 接続に使ってよい時間を設定
-                    it.connectTimeout = 1000
+                    it.connectTimeout = TIMEOUT
                     // データ取得に使ってもよい時間。
-                    it.readTimeout = 1000
+                    it.readTimeout = TIMEOUT
                     // HTTP接続メソッドをGETに設定
                     it.requestMethod
                     // 接続
@@ -127,6 +131,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // 天気情報を変えるかどうかの処理
     private fun changeWeatherInfo(change: Boolean) {
 
         val lSharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
@@ -150,7 +155,7 @@ class MainActivity : AppCompatActivity() {
         private val _result = result
 
         // リストビューに表示させるリストデータ。(天気リストデータ)
-        private var _Citylist: MutableList<MutableMap<String, String>> = mutableListOf()
+        private var _Weatherlist: MutableList<MutableMap<String, String>> = mutableListOf()
 
         @UiThread
         override fun run() {
@@ -178,12 +183,12 @@ class MainActivity : AppCompatActivity() {
             // 都市名の表示
             tvWeatherTelop.text = "${lCityName}の天気"
 
-            val lListJSONArrayZero = lListJSONArray.getJSONObject(0)
+            val lListJSONArrayZero = lListJSONArray.getJSONObject(INIT_NUM)
 
             // 天気情報JSON配列オブジェクトを取得
             val lWeatherJSONArray = lListJSONArrayZero.getJSONArray("weather")
             // 現在の天気情報JSONオブジェクトを取得(配列の0番目を取得)
-            val lWeatherIndex = lWeatherJSONArray.getJSONObject(0)
+            val lWeatherIndex = lWeatherJSONArray.getJSONObject(INIT_NUM)
             // 現在の天気情報文字列を取得
             val lNowWeather = lWeatherIndex.getString("description")
             Log.i(DEBAG_TAG, "天気:${lNowWeather}")
@@ -191,26 +196,37 @@ class MainActivity : AppCompatActivity() {
             // 天気情報を表示
             tvWeatherDesc.text = "現在は${lNowWeather}です。"
 
-            var rCountInt = 0
+            // カウントように変数を作成
+            var rCountInt = INIT_NUM
+            // WAILE_NUM分回すよ
             while (rCountInt<WAILE_NUM) {
-                Log.i("ai", "${rCountInt}")
+
+                // カウント数を表示
+                Log.i("カウント", "${rCountInt}")
                 // 天気情報JSON配列オブジェクトを取得
                 val lListJSONArrayRoot = lListJSONArray.getJSONObject(rCountInt)
                 // 天気情報JSON配列オブジェクトを取得
                 val lWeatherJSONArrayList = lListJSONArrayRoot.getJSONArray("weather")
                 // 現在の天気情報JSONオブジェクトを取得(配列の0番目を取得)
-                val lWeatherArray = lWeatherJSONArrayList.getJSONObject(0)
+                val lWeatherArray = lWeatherJSONArrayList.getJSONObject(INIT_NUM)
                 // 現在の天気情報文字列を取得
                 val lWeather = lWeatherArray.getString("description")
 
-                val city = mutableMapOf("name" to "${lWeather}","comment" to "${rCountInt+1}時間後")
-                _Citylist.add(city)
+                if (rCountInt == INIT_NUM) {
+                    val NawWeather = mutableMapOf("name" to "${lWeather}","comment" to "現在の天気")
+                    _Weatherlist.add(NawWeather)
+                }
+                else{
+                    // 現在の天気と
+                    val NawWeather = mutableMapOf("name" to "${lWeather}","comment" to "${rCountInt}時間後")
+                    _Weatherlist.add(NawWeather)
+                }
 
                 val from = arrayOf("name","comment")
                 val to = intArrayOf(android.R.id.text1,android.R.id.text2)
                 val lCityadapter = SimpleAdapter(
                     this@MainActivity,
-                    _Citylist,
+                    _Weatherlist,
                     android.R.layout.simple_list_item_2,
                     from,
                     to
@@ -222,11 +238,11 @@ class MainActivity : AppCompatActivity() {
             // 気温情報JSONオブジェクトを取得
             val lMain = lListJSONArrayZero.getJSONObject("main")
 
-            tvTemp.text = "現在の気温${lMain.getInt("temp") - 273}"
+            tvTemp.text = "現在の気温${lMain.getInt("temp") - KELVIN_DIFF}"
             // 最低気温情報文字列を取得、表示｛C(摂氏)＝K(ケルビン)-273｝
-            tvTempMin.text = "最低気温${lMain.getInt("temp_min") - 273}"
+            tvTempMin.text = "最低気温${lMain.getInt("temp_min") - KELVIN_DIFF}"
             // 最高気温情報文字列を取得、表示 ｛C(摂氏)＝K(ケルビン)-273｝
-            tvTempMax.text = "最高気温${lMain.getInt("temp_max") - 273}"
+            tvTempMax.text = "最高気温${lMain.getInt("temp_max") - KELVIN_DIFF}"
 
         }
     }
