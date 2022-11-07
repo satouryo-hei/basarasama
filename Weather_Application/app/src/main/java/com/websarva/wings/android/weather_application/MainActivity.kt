@@ -6,11 +6,13 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
+import android.widget.ListView
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.HandlerCompat
+import androidx.core.view.get
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStream
@@ -47,7 +49,7 @@ class MainActivity : AppCompatActivity() {
     // 次の画面を表示するためのボタンを押したときの処理
     fun onButtonClick(view: View){
         // インテントオブジェクトを用意
-        val lIntent = Intent(this@MainActivity,InitActivity::class.java)
+        val lIntent = Intent(this@MainActivity,changeActivity::class.java)
         // アクティビティを起動
         startActivity(lIntent)
     }
@@ -124,7 +126,7 @@ class MainActivity : AppCompatActivity() {
     private fun changeWeatherInfo(change: Boolean) {
 
         val lSharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-        // "Input"から読み出す
+        // "SharedPref"で情報を読み出す
         val lLan = lSharedPref.getString("latitude", "NoData")
         lLan?.let {
 
@@ -153,39 +155,69 @@ class MainActivity : AppCompatActivity() {
             val tvTempMin = findViewById<TextView>(R.id.tvTempMin)
             val tvTempMax = findViewById<TextView>(R.id.tvTempMax)
 
+            var llvWeatherList = findViewById<ListView>(R.id.lvWeather)
+            var lveWeather= findViewById<TextView>(R.id.lveWeather)
+            var a = ""
+
             // ルートJSONオブジェクトを生成
-            val lRootJSON = JSONObject(_result)
+            val lListJSON = JSONObject(_result)
 
-            // 天気情報JSON配列オブジェクトを取得
-            val lRootJSONArray = lRootJSON.getJSONArray("list")
-            // 天気情報JSON配列オブジェクトを取得
-            val lRootJSONArrayAny = lRootJSONArray.getJSONObject(0)
-
+            // ルートJSON配列オブジェクトを取得
+            val lListJSONArray = lListJSON.getJSONArray("list")
 
             // 都市情報JSONオブジェクトを取得を取得
-            val lCityJSON = lRootJSON.getJSONObject("city")
+            val lCityJSON = lListJSON.getJSONObject("city")
 
             // 都市名文字列。を取得
             val lCityName = lCityJSON.getString("name")
-            Log.i(DEBAG_TAG,"${lCityName}")
+            Log.i(DEBAG_TAG,"都市:${lCityName}")
+            // 都市名の表示
+            tvWeatherTelop.text = "${lCityName}の天気"
+
+            val lListJSONArrayZero = lListJSONArray.getJSONObject(0)
+
             // 天気情報JSON配列オブジェクトを取得
-            val lWeatherJSONArray = lRootJSONArrayAny.getJSONArray("weather")
-            // 現在の天気情報JSONオブジェクトを取得
+            val lWeatherJSONArray = lListJSONArrayZero.getJSONArray("weather")
+            // 現在の天気情報JSONオブジェクトを取得(配列の0番目を取得)
             val lWeatherIndex = lWeatherJSONArray.getJSONObject(0)
             // 現在の天気情報文字列を取得
-            val lWeather = lWeatherIndex.getString("description")
-            Log.i(DEBAG_TAG,"${lWeather}")
+            val lNowWeather = lWeatherIndex.getString("description")
+            Log.i(DEBAG_TAG, "天気:${lNowWeather}")
 
-            // 気温情報JSONオブジェクトを取得
-            val lMain = lRootJSONArrayAny.getJSONObject("main")
             // 天気情報を表示
-            tvWeatherTelop.text = "${lCityName}の天気"
-            tvWeatherDesc.text = "現在は${lWeather}です。"
-            tvTemp.text = "現在の気温${lMain.getInt("temp")-273}"
+            tvWeatherDesc.text = "現在は${lNowWeather}です。"
+
+            var i = 0
+            while (i<10) {
+                Log.i("ai", "${i}")
+                // 天気情報JSON配列オブジェクトを取得
+                val lListJSONArrayRoot = lListJSONArray.getJSONObject(i)
+                // 天気情報JSON配列オブジェクトを取得
+                val lWeatherJSONArrayList = lListJSONArrayRoot.getJSONArray("weather")
+                // 現在の天気情報JSONオブジェクトを取得(配列の0番目を取得)
+                val lWeatherArray = lWeatherJSONArrayList.getJSONObject(0)
+                // 現在の天気情報文字列を取得
+                val lWeather = lWeatherArray.getString("description")
+
+                a += lWeather
+                if (i==0) {
+                    lveWeather.text = "現在は${a}"
+                    Log.i(DEBAG_TAG, "初回:${lWeather}")
+                }
+                else{
+                    lveWeather.text = "\n${a}"
+                    Log.i(DEBAG_TAG, "${i}回目:${lWeather}")
+                }
+                ++i
+            }
+            // 気温情報JSONオブジェクトを取得
+            val lMain = lListJSONArrayZero.getJSONObject("main")
+
+            tvTemp.text = "現在の気温${lMain.getInt("temp") - 273}"
             // 最低気温情報文字列を取得、表示｛C(摂氏)＝K(ケルビン)-273｝
-            tvTempMin.text ="最低気温${lMain.getInt("temp_min")-273}"
+            tvTempMin.text = "最低気温${lMain.getInt("temp_min") - 273}"
             // 最高気温情報文字列を取得、表示 ｛C(摂氏)＝K(ケルビン)-273｝
-            tvTempMax.text ="最高気温${lMain.getInt("temp_max")-273}"
+            tvTempMax.text = "最高気温${lMain.getInt("temp_max") - 273}"
         }
     }
 }

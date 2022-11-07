@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">お天気アプリ</string>
+    <string name="tv_winfo_Setup">初期設定</string>
     <string name="tv_winfo_Title">お天気詳細</string>
+    <string name="tv_winfo_Select">選択画面</string>
+    <string name="tv_winfo_Setting">設定画面</string>
+
     <string-array name="ls_ja_citylist">
         <item>Sapporo</item>
         <item>Tokyo</item>
@@ -14,13 +18,13 @@
         <item>Hiroshima</item>
     </string-array>
     <string-array name="ls_ja_Modelist">
-    <item>MODE_NONE</item>
-    <item>MODE_NEXT</item>
-    <item>MODE_PREVIOUS</item>
-</string-array>
+        <item>MODE_NONE</item>
+        <item>MODE_NEXT</item>
+        <item>MODE_PREVIOUS</item>
+    </string-array>
 
-    <string name="bt_next">次に行く</string>
-    <string name="bt_previous">前に行く</string>
+    <string name="bt_next_Setting">設定画面に行く</string>
+    <string name="bt_previous">前に戻る</string>
 
     <string name="preference_file_key">DataStore</string>
 </resources>

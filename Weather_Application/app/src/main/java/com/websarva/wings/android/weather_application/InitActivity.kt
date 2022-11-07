@@ -161,9 +161,10 @@ class InitActivity : AppCompatActivity() {
             Log.i(DEBAG_TAG,"緯度:${lLongitude}")
             editor.putBoolean("first", false)
             editor.apply()
-
+            // インテントオブジェクトを用意(どこに遷移するか)
             val intent = Intent(this@InitActivity, MainActivity::class.java)
             //intent.putExtra("Bool", true)
+            // アクティビティを起動(遷移開始)
             startActivity(intent)
 
             //finish()
@@ -182,14 +183,17 @@ class InitActivity : AppCompatActivity() {
                 receiveWeatherInfo(urlFull)
             }
             Log.i("${DEBAG_TAG}:Item","${item}")
-        }
-    }
 
-    // 次の画面を表示するためのボタンを押したときの処理
-    fun onButtonClick(view: View){
-        // インテントオブジェクトを用意
-        val lIntent = Intent(this@InitActivity,changeActivity::class.java)
-        // アクティビティを起動
-        startActivity(lIntent)
+            // "DataStore"という名前でインスタンスを生成
+            val sharedPref = getSharedPreferences(
+                getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE
+            )
+
+            // 文字列を"Input"に書き込む
+            val editor = sharedPref.edit()
+            editor.putString("q", "${item}")
+
+        }
     }
 }

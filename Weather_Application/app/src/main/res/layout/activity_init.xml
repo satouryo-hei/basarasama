@@ -5,24 +5,16 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        android:text="@string/tv_winfo_Setup"
+        android:textSize="25sp"/>
     <ListView
         android:id="@+id/lsjacitylist"
         android:layout_width="wrap_content"
-        android:layout_height="165dp"
-        android:entries="@array/ls_ja_citylist" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_weight="0.5"
-        android:orientation="vertical">
-
-    <Button
-        android:id="@+id/btNext"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="onButtonClick"
-        android:text = "@string/bt_next"/>
-    </LinearLayout>
+        android:entries="@array/ls_ja_citylist" />
 </LinearLayout>
