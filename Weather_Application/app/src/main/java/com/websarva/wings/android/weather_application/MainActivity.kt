@@ -13,7 +13,6 @@ import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.HandlerCompat
-import androidx.core.view.get
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStream
@@ -27,7 +26,7 @@ class MainActivity : AppCompatActivity() {
     // クラス内のprivate定数を宣言するために
     companion object {
         // ログに記載するタグ用の文字列
-        private const val DEBAG_TAG = "Debag:API通信MAIN"
+        private const val DEBUG_TAG = "Debug:API通信MAIN"
 
         // お天気情報のURL
         private const val WEATHERINFO_URL = "https://api.openweathermap.org/data/2.5/forecast?lang=ja"
@@ -40,10 +39,9 @@ class MainActivity : AppCompatActivity() {
         // データ取得時間
         private const val TIMEOUT = 1000
         // 回す回数
-        private const val WAILE_NUM = 11
+        private const val WHILE_NUM = 11
         // 摂氏へ変化するときの数
         private const val KELVIN_DIFF = 273
-
     }
 
 
@@ -108,7 +106,7 @@ class MainActivity : AppCompatActivity() {
                     // InputStreamオブジェクトを解放
                     stream.close()
                 } catch (ex: SocketTimeoutException) {
-                    Log.w(DEBAG_TAG, "通信タイムアウト", ex)
+                    Log.w(DEBUG_TAG, "通信タイムアウト", ex)
                 }
                 // HttpURLConnectionオブジェクトを解放
                 it.disconnect()
@@ -141,8 +139,8 @@ class MainActivity : AppCompatActivity() {
 
             val lLon = lSharedPref.getString("longitude", "NoData")
 
-            Log.i(DEBAG_TAG,"${lLan}")
-            Log.i(DEBAG_TAG,"${lLon}")
+            Log.i(DEBUG_TAG,"${lLan}")
+            Log.i(DEBUG_TAG,"${lLon}")
 
             val urlFull = "$WEATHERINFO_URL&lat=${lLan}&lon=${lLon}&appid=$APP_ID"
             receiveWeatherInfo(urlFull)
@@ -154,19 +152,19 @@ class MainActivity : AppCompatActivity() {
         // 取得したお天気情報JSON文字列。
         private val _result = result
 
-        // リストビューに表示させるリストデータ。(天気リストデータ)
-        private var _Weatherlist: MutableList<MutableMap<String, String>> = mutableListOf()
+        private lateinit var dcrCustomActivity: CustomActivity
+        private  var dcrAnimalList: ArrayList<HourlyWeather> = arrayListOf()
 
         @UiThread
         override fun run() {
             // ここにUIスレッドを行う処理コードを記述
             // 天気情報を表示するTextViewを取得
-            val tvWeatherTelop = findViewById<TextView>(R.id.tvWeatherTelop)
-            val tvWeatherDesc = findViewById<TextView>(R.id.tvWeatherDesc)
-            val tvTemp = findViewById<TextView>(R.id.tvTemp)
-            val tvTempMin = findViewById<TextView>(R.id.tvTempMin)
-            val tvTempMax = findViewById<TextView>(R.id.tvTempMax)
-            var llvWeatherList = findViewById<ListView>(R.id.lvWeather)
+            val lTvCityTelop = findViewById<TextView>(R.id.tvCityTelop)
+            val lTvWeatherDesc = findViewById<TextView>(R.id.tvWeatherDesc)
+            val lTvTemp = findViewById<TextView>(R.id.tvTemp)
+            val lTvTempMin = findViewById<TextView>(R.id.tvTempMin)
+            val lTvTempMax = findViewById<TextView>(R.id.tvTempMax)
+            var lLvWeatherList = findViewById<ListView>(R.id.lvWeather)
 
             // ルートJSONオブジェクトを生成
             val lListJSON = JSONObject(_result)
@@ -179,10 +177,11 @@ class MainActivity : AppCompatActivity() {
 
             // 都市名文字列。を取得
             val lCityName = lCityJSON.getString("name")
-            Log.i(DEBAG_TAG,"都市:${lCityName}")
+            Log.i(DEBUG_TAG,"都市:${lCityName}")
             // 都市名の表示
-            tvWeatherTelop.text = "${lCityName}の天気"
+            lTvCityTelop.text = "${lCityName}の天気"
 
+            // ルートJSON配列オブジェクトの0番目を取得
             val lListJSONArrayZero = lListJSONArray.getJSONObject(INIT_NUM)
 
             // 天気情報JSON配列オブジェクトを取得
@@ -191,19 +190,19 @@ class MainActivity : AppCompatActivity() {
             val lWeatherIndex = lWeatherJSONArray.getJSONObject(INIT_NUM)
             // 現在の天気情報文字列を取得
             val lNowWeather = lWeatherIndex.getString("description")
-            Log.i(DEBAG_TAG, "天気:${lNowWeather}")
+            Log.i(DEBUG_TAG, "天気:${lNowWeather}")
 
             // 天気情報を表示
-            tvWeatherDesc.text = "現在は${lNowWeather}です。"
+            lTvWeatherDesc.text = "現在は${lNowWeather}です。"
 
-            // カウントように変数を作成
+            // カウントように変数を作成(初期化)
             var rCountInt = INIT_NUM
-            // WAILE_NUM分回すよ
-            while (rCountInt<WAILE_NUM) {
+            // WHILE_NUMの回数分回すよ
+            while (rCountInt<WHILE_NUM) {
 
                 // カウント数を表示
                 Log.i("カウント", "${rCountInt}")
-                // 天気情報JSON配列オブジェクトを取得
+                // ルートJSON配列オブジェクトのrCountInt番目を取得
                 val lListJSONArrayRoot = lListJSONArray.getJSONObject(rCountInt)
                 // 天気情報JSON配列オブジェクトを取得
                 val lWeatherJSONArrayList = lListJSONArrayRoot.getJSONArray("weather")
@@ -212,38 +211,46 @@ class MainActivity : AppCompatActivity() {
                 // 現在の天気情報文字列を取得
                 val lWeather = lWeatherArray.getString("description")
 
+                // 気温情報JSON配列オブジェクトを取得
+                val lMainArray = lListJSONArrayRoot.getJSONObject("main")
+                // 現在の気温情報を取得
+                val lTemp = lMainArray.getInt("temp")
+                Log.i(DEBUG_TAG, "気温:${lTemp}")
+
+                // rCountIntが0だったら
                 if (rCountInt == INIT_NUM) {
-                    val NawWeather = mutableMapOf("name" to "${lWeather}","comment" to "現在の天気")
-                    _Weatherlist.add(NawWeather)
+                    // 初回の情報を取得
+                    val lHourlyWeather = HourlyWeather("${lWeather}","現在の天気",lTemp,
+                        "現在の気温")
+                    // dcrAnimalListに追加
+                    dcrAnimalList.add(lHourlyWeather)
+                    Log.i(DEBUG_TAG, "気温:${dcrAnimalList}")
                 }
                 else{
-                    // 現在の天気と
-                    val NawWeather = mutableMapOf("name" to "${lWeather}","comment" to "${rCountInt}時間後")
-                    _Weatherlist.add(NawWeather)
+                    // 1時間ごとの天気情報と気温情報を取得
+                    val lHourlyWeather = HourlyWeather("${lWeather}","${rCountInt}時間後の天気",
+                        lTemp,"${rCountInt}時間後の気温")
+                    // dcrAnimalListに追加
+                    dcrAnimalList.add(lHourlyWeather)
+                    Log.i(DEBUG_TAG, "気温:${dcrAnimalList}")
                 }
 
-                val from = arrayOf("name","comment")
-                val to = intArrayOf(android.R.id.text1,android.R.id.text2)
-                val lCityadapter = SimpleAdapter(
-                    this@MainActivity,
-                    _Weatherlist,
-                    android.R.layout.simple_list_item_2,
-                    from,
-                    to
-                )
-                llvWeatherList.adapter = lCityadapter
+                // CustomAdapterの生成と設定
+                dcrCustomActivity = CustomActivity(this@MainActivity, dcrAnimalList)
+                lLvWeatherList.adapter = dcrCustomActivity
 
+                // rCountInt+1をして次に進める
                 ++rCountInt
             }
             // 気温情報JSONオブジェクトを取得
             val lMain = lListJSONArrayZero.getJSONObject("main")
 
-            tvTemp.text = "現在の気温${lMain.getInt("temp") - KELVIN_DIFF}"
+            // 気温情報文字列を取得、表示｛C(摂氏)＝K(ケルビン)-273｝
+            lTvTemp.text = "現在の気温：${lMain.getInt("temp") - KELVIN_DIFF}℃"
             // 最低気温情報文字列を取得、表示｛C(摂氏)＝K(ケルビン)-273｝
-            tvTempMin.text = "最低気温${lMain.getInt("temp_min") - KELVIN_DIFF}"
+            lTvTempMin.text = "最低気温：${lMain.getInt("temp_min") - KELVIN_DIFF}℃"
             // 最高気温情報文字列を取得、表示 ｛C(摂氏)＝K(ケルビン)-273｝
-            tvTempMax.text = "最高気温${lMain.getInt("temp_max") - KELVIN_DIFF}"
-
+            lTvTempMax.text = "最高気温：${lMain.getInt("temp_max") - KELVIN_DIFF}℃"
         }
     }
 }

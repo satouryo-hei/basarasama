@@ -11,10 +11,9 @@
         android:layout_marginBottom="10dp"
         android:gravity="center"
         android:text="@string/tv_winfo_Setup"
-        android:textSize="25sp"/>
+        android:textSize="30sp"/>
     <ListView
         android:id="@+id/lsjacitylist"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:entries="@array/ls_ja_citylist" />
+        android:layout_height="wrap_content" />
 </LinearLayout>

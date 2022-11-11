@@ -1,6 +1,5 @@
 package com.websarva.wings.android.weather_application
 
-import android.R.attr.data
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -9,6 +8,7 @@ import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ListView
+import android.widget.SimpleAdapter
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -29,7 +29,7 @@ class InitActivity : AppCompatActivity() {
     // クラス内のprivate定数を宣言するために
     companion object {
         // ログに記載するタグ用の文字列
-        private const val DEBAG_TAG = "Debag:API通信INIT"
+        private const val DEBUG_TAG = "Debug:API通信INIT"
 
         // お天気情報のURL
         private const val WEATHERINFO_URL = "https://api.openweathermap.org/data/2.5/weather?lang=ja"
@@ -40,6 +40,8 @@ class InitActivity : AppCompatActivity() {
         // データ取得時間
         private const val TIMEOUT = 1000
     }
+    // リストビューに表示させるリストデータ。(天気リストデータ)
+    private var _Citylist: MutableList<MutableMap<String, String>> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,25 +56,56 @@ class InitActivity : AppCompatActivity() {
            startActivity(intent)
        }
 
+        _Citylist = createList()
 
-
-        val llvCityList = findViewById<ListView>(R.id.lsjacitylist)
-        llvCityList.onItemClickListener = ListInitClickListener()
+        val lLvCityList = findViewById<ListView>(R.id.lsjacitylist)
+        val from = arrayOf("name")
+        val to = intArrayOf(android.R.id.text1)
+        val adapter = SimpleAdapter(this@InitActivity,_Citylist,android.R.layout.simple_list_item_1,from,to)
+        lLvCityList.adapter = adapter
+        lLvCityList.onItemClickListener = ListInitClickListener()
     }
 
+    // リストビューに表示させる天気ポイントリストデータを生成するメソッド
+    private  fun createList(): MutableList<MutableMap<String,String>> {
+        var rList: MutableList<MutableMap<String, String>> = mutableListOf()
+
+        var rCity = mutableMapOf("name" to "札幌", "q" to "Sapporo")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "東京", "q" to "Tokyo")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "大阪", "q" to "Osaka")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "北見", "q" to "Kitami")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "那覇", "q" to "Naha")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "旭川", "q" to "Asahikawa")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "京都", "q" to "Kyoto")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "名古屋", "q" to "Nagoya")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "神戸", "q" to "Kobe")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "広島", "q" to "Hiroshima")
+        rList.add(rCity)
+
+        return rList
+    }
 
     @UiThread
     // お天気情報の取得処理を行うメソッド
     private fun receiveWeatherInfo(nrlFull: String) {
         // ここに非同期で天気情報を取得する処理を記述する。
         var rHandler = HandlerCompat.createAsync(mainLooper)
-        val lBackgroundReceiver = WeathetInfoBackgroundReceiver(rHandler, nrlFull)
+        val lBackgroundReceiver = WeatherInfoBackgroundReceiver(rHandler, nrlFull)
         val lExecuteService = Executors.newSingleThreadExecutor()
         lExecuteService.submit(lBackgroundReceiver)
     }
 
     // 非同期でお天気情報APIにアクセスするためのクラス
-    private inner class WeathetInfoBackgroundReceiver(handler: Handler, url: String) : Runnable {
+    private inner class WeatherInfoBackgroundReceiver(handler: Handler, url: String) : Runnable {
         // ハンドラオブジェクト
         private val _handler = handler
 
@@ -106,7 +139,7 @@ class InitActivity : AppCompatActivity() {
                     // InputStreamオブジェクトを解放
                     stream.close()
                 } catch (ex: SocketTimeoutException) {
-                    Log.w(DEBAG_TAG, "通信タイムアウト", ex)
+                    Log.w(DEBUG_TAG, "通信タイムアウト", ex)
                 }
                 // HttpURLConnectionオブジェクトを解放
                 it.disconnect()
@@ -142,11 +175,11 @@ class InitActivity : AppCompatActivity() {
             // 都市名文字列。を取得
             val lCityName = lRootJSON.getString("name")
             // 経緯度情報JSONオブジェクトを取得
-            val coordJSON = lRootJSON.getJSONObject("coord")
+            val lCoordJSON = lRootJSON.getJSONObject("coord")
             // 緯度情報文字列を取得
-            val lLatitude = coordJSON.getString("lat")
+            val lLatitude = lCoordJSON.getString("lat")
             // 経度情報文字列を取得
-            val lLongitude = coordJSON.getString("lon")
+            val lLongitude = lCoordJSON.getString("lon")
 
             // "DataStore"という名前でインスタンスを生成
             val sharedPref = getSharedPreferences(
@@ -157,11 +190,11 @@ class InitActivity : AppCompatActivity() {
             // 文字列を"Input"に書き込む
             val editor = sharedPref.edit()
             editor.putString("CityName", "${lCityName}")
-            Log.i(DEBAG_TAG,"都市の名前:${lCityName}")
+            Log.i(DEBUG_TAG,"都市の名前:${lCityName}")
             editor.putString("latitude", "${lLatitude}")
-            Log.i(DEBAG_TAG,"経度:${lLatitude}")
+            Log.i(DEBUG_TAG,"経度:${lLatitude}")
             editor.putString("longitude", "${lLongitude}")
-            Log.i(DEBAG_TAG,"緯度:${lLongitude}")
+            Log.i(DEBUG_TAG,"緯度:${lLongitude}")
             editor.putBoolean("first", false)
             editor.apply()
             // インテントオブジェクトを用意(どこに遷移するか)
@@ -174,29 +207,33 @@ class InitActivity : AppCompatActivity() {
         }
     }
 
-
-
+    // 一度押されたら変えられないようにするための変数
+    private var booleanOn = true
     // リストがタップされたときの処理が記述されたリスナクラス
     private inner class ListInitClickListener : AdapterView.OnItemClickListener {
         override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-            val Text = view as TextView
-            val item = Text.text.toString()
-            item?.let {
-                val urlFull = "$WEATHERINFO_URL&q=$item&appid=$APP_ID"
-                receiveWeatherInfo(urlFull)
+
+            if (booleanOn) {
+                val lText = _Citylist.get(position)
+                val lQ = lText.get("q")
+                lQ?.let {
+                    val urlFull = "$WEATHERINFO_URL&q=$lQ&appid=$APP_ID"
+                    receiveWeatherInfo(urlFull)
+                }
+                Log.i("${DEBUG_TAG}:q=", "${lQ}")
+
+                // "DataStore"という名前でインスタンスを生成
+                val sharedPref = getSharedPreferences(
+                    getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE
+                )
+
+                // 文字列を"Input"に書き込む
+                val editor = sharedPref.edit()
+                editor.putString("q", "${lQ}")
+                editor.apply()
+                booleanOn = false
             }
-            Log.i("${DEBAG_TAG}:Item","${item}")
-
-            // "DataStore"という名前でインスタンスを生成
-            val sharedPref = getSharedPreferences(
-                getString(R.string.preference_file_key),
-                Context.MODE_PRIVATE
-            )
-
-            // 文字列を"Input"に書き込む
-            val editor = sharedPref.edit()
-            editor.putString("q", "${item}")
-            editor.apply()
         }
     }
 }

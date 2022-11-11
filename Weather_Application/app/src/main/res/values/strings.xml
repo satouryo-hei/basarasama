@@ -4,28 +4,11 @@
     <string name="tv_winfo_Title">お天気詳細</string>
     <string name="tv_winfo_Select">選択画面</string>
     <string name="tv_winfo_Setting">設定画面</string>
-    <string name="tv_future_winfo">これからの天気情報</string>
-
-    <string-array name="ls_ja_citylist">
-        <item>Sapporo</item>
-        <item>Tokyo</item>
-        <item>Osaka</item>
-        <item>Kitami</item>
-        <item>Naha</item>
-        <item>Asahikawa</item>
-        <item>Kyoto</item>
-        <item>Nagoya</item>
-        <item>Kobe</item>
-        <item>Hiroshima</item>
-    </string-array>
-    <string-array name="ls_ja_Modelist">
-        <item>MODE_NONE</item>
-        <item>MODE_NEXT</item>
-        <item>MODE_PREVIOUS</item>
-    </string-array>
+    <string name="tv_future_winfo">1時間ごとの天気予報</string>
 
     <string name="bt_next_Setting">設定画面に行く</string>
     <string name="bt_previous">前に戻る</string>
+    <string name="bt_Decision">決定</string>
 
     <string name="preference_file_key">DataStore</string>
 </resources>

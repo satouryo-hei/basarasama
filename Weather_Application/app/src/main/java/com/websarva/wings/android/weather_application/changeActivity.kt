@@ -2,6 +2,7 @@ package com.websarva.wings.android.weather_application
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -9,6 +10,7 @@ import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ListView
+import android.widget.SimpleAdapter
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -26,7 +28,7 @@ class changeActivity : AppCompatActivity() {
     // クラス内のprivate定数を宣言するために
     companion object {
         // ログに記載するタグ用の文字列
-        private const val DEBAG_TAG = "Debag:API通信INIT"
+        private const val DEBUG_TAG = "Debug:API通信Change"
 
         // お天気情報のURL
         private const val WEATHERINFO_URL = "https://api.openweathermap.org/data/2.5/weather?lang=ja"
@@ -38,22 +40,52 @@ class changeActivity : AppCompatActivity() {
         private const val TIMEOUT = 1000
     }
 
+    // リストビューに表示させるリストデータ。(天気リストデータ)
+    private var _Citylist: MutableList<MutableMap<String, String>> = mutableListOf()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_change)
 
-        val lSharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
         val lTvSelection =  findViewById<TextView>(R.id.tvSelection)
-        // "Input"から読み出す
-        if((lSharedPref.getBoolean("first", false)))
-        {
-            val intent = Intent(this@changeActivity, MainActivity::class.java)
-            startActivity(intent)
-        }
-        val NowSelect = lSharedPref.getString("CityName", "NoData")
-        lTvSelection.text = "現在選択中の都市:${NowSelect}"
-        val llvCityList = findViewById<ListView>(R.id.lscitylist)
-        llvCityList.onItemClickListener = ListItemClickListener()
+        lTvSelection.text = "現在選択されていません"
+
+        _Citylist = createList()
+
+        val lLvCityList = findViewById<ListView>(R.id.lscitylist)
+        val from = arrayOf("name")
+        val to = intArrayOf(android.R.id.text1)
+        val adapter = SimpleAdapter(this@changeActivity,_Citylist,android.R.layout.simple_list_item_1,from,to)
+        lLvCityList.adapter = adapter
+        lLvCityList.onItemClickListener = ListChangeClickListener()
+    }
+
+    // リストビューに表示させる天気ポイントリストデータを生成するメソッド
+    private  fun createList(): MutableList<MutableMap<String,String>> {
+        var rList: MutableList<MutableMap<String, String>> = mutableListOf()
+
+        var rCity = mutableMapOf("name" to "札幌", "q" to "Sapporo")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "東京", "q" to "Tokyo")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "大阪", "q" to "Osaka")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "北見", "q" to "Kitami")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "那覇", "q" to "Naha")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "旭川", "q" to "Asahikawa")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "京都", "q" to "Kyoto")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "名古屋", "q" to "Nagoya")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "神戸", "q" to "Kobe")
+        rList.add(rCity)
+        rCity = mutableMapOf("name" to "広島", "q" to "Hiroshima")
+        rList.add(rCity)
+
+        return rList
     }
 
 
@@ -62,13 +94,13 @@ class changeActivity : AppCompatActivity() {
     private fun receiveWeatherInfo(nrlFull: String) {
         // ここに非同期で天気情報を取得する処理を記述する。
         var rHandler = HandlerCompat.createAsync(mainLooper)
-        val lBackgroundReceiver = WeathetInfoBackgroundReceiver(rHandler, nrlFull)
+        val lBackgroundReceiver = WeatherInfoBackgroundReceiver(rHandler, nrlFull)
         val lExecuteService = Executors.newSingleThreadExecutor()
         lExecuteService.submit(lBackgroundReceiver)
     }
 
     // 非同期でお天気情報APIにアクセスするためのクラス
-    private inner class WeathetInfoBackgroundReceiver(handler: Handler, url: String) : Runnable {
+    private inner class WeatherInfoBackgroundReceiver(handler: Handler, url: String) : Runnable {
         // ハンドラオブジェクト
         private val _handler = handler
 
@@ -102,7 +134,7 @@ class changeActivity : AppCompatActivity() {
                     // InputStreamオブジェクトを解放
                     stream.close()
                 } catch (ex: SocketTimeoutException) {
-                    Log.w(DEBAG_TAG, "通信タイムアウト", ex)
+                    Log.w(DEBUG_TAG, "通信タイムアウト", ex)
                 }
                 // HttpURLConnectionオブジェクトを解放
                 it.disconnect()
@@ -139,49 +171,43 @@ class changeActivity : AppCompatActivity() {
             val lCityName = lRootJSON.getString("name")
             // 経緯度情報JSONオブジェクトを取得
             val coordJSON = lRootJSON.getJSONObject("coord")
+            Log.i(DEBUG_TAG,"経緯度:${coordJSON}")
             // 緯度情報文字列を取得
             val lLatitude = coordJSON.getString("lat")
             // 経度情報文字列を取得
             val lLongitude = coordJSON.getString("lon")
 
+            val lTvSelection =  findViewById<TextView>(R.id.tvSelection)
+            lTvSelection.text = "現在選択中の都市:${lCityName}"
+
             // "DataStore"という名前でインスタンスを生成
-            val sharedPref = getSharedPreferences(
+            val lSharedPref = getSharedPreferences(
                 getString(R.string.preference_file_key),
                 Context.MODE_PRIVATE
             )
 
             // 文字列を"Input"に書き込む
-            val editor = sharedPref.edit()
+            val editor = lSharedPref.edit()
             editor.putString("CityName", "${lCityName}")
-            Log.i(DEBAG_TAG,"都市の名前:${lCityName}")
+            Log.i(DEBUG_TAG,"都市の名前:${lCityName}")
             editor.putString("latitude", "${lLatitude}")
-            Log.i(DEBAG_TAG,"経度:${lLatitude}")
+            Log.i(DEBUG_TAG,"経度:${lLatitude}")
             editor.putString("longitude", "${lLongitude}")
-            Log.i(DEBAG_TAG,"緯度:${lLongitude}")
-            editor.putBoolean("first", false)
+            Log.i(DEBUG_TAG,"緯度:${lLongitude}")
             editor.apply()
-            // インテントオブジェクトを用意(どこに遷移するか)
-            val intent = Intent(this@changeActivity, TopActivity::class.java)
-            //intent.putExtra("Bool", true)
-            // アクティビティを起動(遷移開始)
-            startActivity(intent)
-
-            //finish()
         }
     }
-
-
 
     // リストがタップされたときの処理が記述されたリスナクラス
-    private inner class ListItemClickListener : AdapterView.OnItemClickListener {
+    private inner class ListChangeClickListener : AdapterView.OnItemClickListener {
         override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-            val Text = view as TextView
-            val item = Text.text.toString()
-            item?.let {
-                val urlFull = "$WEATHERINFO_URL&q=$item&appid=$APP_ID"
+            val lText = _Citylist.get(position)
+            val lQ = lText.get("q")
+            lQ?.let {
+                val urlFull = "$WEATHERINFO_URL&q=$lQ&appid=$APP_ID"
                 receiveWeatherInfo(urlFull)
             }
-            Log.i("${DEBAG_TAG}:Item","${item}")
+            Log.i("${DEBUG_TAG}:Item","${lQ}")
 
             // "DataStore"という名前でインスタンスを生成
             val sharedPref = getSharedPreferences(
@@ -191,14 +217,20 @@ class changeActivity : AppCompatActivity() {
 
             // 文字列を"Input"に書き込む
             val editor = sharedPref.edit()
-            editor.putString("q", "${item}")
-
+            editor.putString("q", "${lQ}")
+            editor.apply()
         }
     }
 
-    fun onButtonClick(view: View){
+    // 戻るボタンが押されたときの処理
+    fun onPreviousButtonClick(view: View){
+        finish()
+    }
+
+    // 決定ボタンが押されたときの処理
+    fun onDecisionButtonClick(view: View){
         // インテントオブジェクトを用意(どこに遷移するか)
-        val intent = Intent(this@changeActivity, MainActivity::class.java)
+        val intent = Intent(this@changeActivity, TopActivity::class.java)
         // アクティビティを起動(遷移開始)
         startActivity(intent)
     }

@@ -21,13 +21,9 @@ android:orientation="vertical">
 
         <ListView
             android:id="@+id/lvSelectWeather"
-            android:layout_width="136dp"
+            android:layout_width="match_parent"
             android:layout_height="544dp" />
 
-        <ListView
-            android:id="@+id/lvDisplayWeather"
-            android:layout_width="129dp"
-            android:layout_height="544dp" />
     </LinearLayout>
 
     <LinearLayout

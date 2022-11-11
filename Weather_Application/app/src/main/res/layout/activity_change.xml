@@ -22,15 +22,28 @@
     <ListView
         android:id="@+id/lscitylist"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:entries="@array/ls_ja_citylist" />
+        android:layout_height="526dp" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/btPrevious"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="onButtonClick"
-        android:text="@string/bt_previous"/>
+        <Button
+            android:id="@+id/btPrevious"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="3dp"
+            android:onClick="onPreviousButtonClick"
+            android:text="@string/bt_previous" />
 
+        <Button
+            android:id="@+id/btDecision"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="200dp"
+            android:onClick="onDecisionButtonClick"
+            android:text="@string/bt_Decision" />
+
+    </LinearLayout>
 </LinearLayout>

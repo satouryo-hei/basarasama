@@ -23,12 +23,12 @@ import java.net.SocketTimeoutException
 import java.net.URL
 import java.util.concurrent.Executors
 
-class TopActivity : AppCompatActivity() {
-
+class TopActivity : AppCompatActivity(){
+    lateinit var a : changeActivity
     // クラス内のprivate定数を宣言するために
     companion object {
         // ログに記載するタグ用の文字列
-        private const val DEBAG_TAG = "Debag:API通信Top"
+        private const val DEBUG_TAG = "Debug:API通信Top"
     }
 
     // リストビューに表示させるリストデータ。(都市リストデータ)
@@ -39,18 +39,18 @@ class TopActivity : AppCompatActivity() {
         setContentView(R.layout.activity_top)
 
         _Citylist = createCityList()
-        Log.i(DEBAG_TAG, "Citylist:${_Citylist}")
+        Log.i(DEBUG_TAG, "Citylist:${_Citylist}")
         val lvCityList = findViewById<ListView>(R.id.lvSelectWeather)
         val from = arrayOf("name")
         val to = intArrayOf(android.R.id.text1)
-        val lCityadapter = SimpleAdapter(
+        val lCityAdapter = SimpleAdapter(
             this@TopActivity,
             _Citylist,
             android.R.layout.simple_list_item_1,
             from,
             to
         )
-        lvCityList.adapter = lCityadapter
+        lvCityList.adapter = lCityAdapter
         lvCityList.onItemClickListener = ListCityClickListener()
     }
 
@@ -60,20 +60,20 @@ class TopActivity : AppCompatActivity() {
 
         val lSharedPref =
             getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-        // "SharedPref"で情報を読み出す
-        val lCityName = lSharedPref.getString("CityName", "NoData")
-        lCityName?.let {
-
+        lSharedPref?.let {
+            // "SharedPref"で情報を読み出す
+            val lCityName = lSharedPref.getString("CityName", "NoData")
             val lQ = lSharedPref.getString("q", "NoData")
 
-            Log.i(DEBAG_TAG, "${lCityName}")
-            Log.i(DEBAG_TAG, "${lQ}")
+            Log.i(DEBUG_TAG, "${lCityName}")
+            Log.i(DEBUG_TAG, "${lQ}")
 
             var city = mutableMapOf("name" to "${lCityName}", "q" to "${lQ}")
             list.add(city)
         }
         return list
     }
+
 
     // リストがタップされたときの処理が記述されたリスナクラス
     private inner class ListCityClickListener : AdapterView.OnItemClickListener {
@@ -85,11 +85,8 @@ class TopActivity : AppCompatActivity() {
         }
     }
 
-    // 次の画面を表示するためのボタンを押したときの処理
+    // 前の画面を表示するためのボタンを押したときの処理
     fun onButtonClick(view: View){
-        // インテントオブジェクトを用意
-        val lIntent = Intent(this@TopActivity,changeActivity::class.java)
-        // アクティビティを起動
-        startActivity(lIntent)
+        finish()
     }
 }
