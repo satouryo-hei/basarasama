@@ -195,15 +195,14 @@ class InitActivity : AppCompatActivity() {
             Log.i(DEBUG_TAG,"経度:${lLatitude}")
             editor.putString("longitude", "${lLongitude}")
             Log.i(DEBUG_TAG,"緯度:${lLongitude}")
-            editor.putBoolean("first", false)
+            editor.putBoolean("first", true)
             editor.apply()
             // インテントオブジェクトを用意(どこに遷移するか)
             val intent = Intent(this@InitActivity, MainActivity::class.java)
-            //intent.putExtra("Bool", true)
             // アクティビティを起動(遷移開始)
             startActivity(intent)
 
-            //finish()
+
         }
     }
 
