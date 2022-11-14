@@ -38,6 +38,7 @@ class TopActivity : AppCompatActivity(){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_top)
 
+        // 都市リストの生成
         _Citylist = createCityList()
         Log.i(DEBUG_TAG, "Citylist:${_Citylist}")
         val lvCityList = findViewById<ListView>(R.id.lvSelectWeather)

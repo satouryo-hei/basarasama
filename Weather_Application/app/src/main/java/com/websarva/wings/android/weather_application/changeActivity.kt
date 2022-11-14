@@ -8,13 +8,16 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ListView
 import android.widget.SimpleAdapter
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.core.graphics.colorSpace
 import androidx.core.os.HandlerCompat
+import androidx.core.view.get
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStream
@@ -38,6 +41,12 @@ class changeActivity : AppCompatActivity() {
 
         // データ取得時間
         private const val TIMEOUT = 1000
+
+        // 初期化の数
+        private const val INIT_NUM = 0
+
+        // 回す回数
+        private const val CITY_NUM = 10
     }
 
     // リストビューに表示させるリストデータ。(天気リストデータ)
@@ -50,6 +59,7 @@ class changeActivity : AppCompatActivity() {
         val lTvSelection =  findViewById<TextView>(R.id.tvSelection)
         lTvSelection.text = "現在選択されていません"
 
+        // 都市リストを生成
         _Citylist = createList()
 
         val lLvCityList = findViewById<ListView>(R.id.lscitylist)
@@ -124,7 +134,7 @@ class changeActivity : AppCompatActivity() {
                     // データ取得に使ってもよい時間。
                     it.readTimeout = TIMEOUT
                     // HTTP接続メソッドをGETに設定
-                    it.requestMethod
+                    it.requestMethod = "GET"
                     // 接続
                     it.connect()
                     // HttpURLConnectionオブジェクトからレスポンスデータを取得
@@ -198,8 +208,11 @@ class changeActivity : AppCompatActivity() {
         }
     }
 
+
+
     // リストがタップされたときの処理が記述されたリスナクラス
     private inner class ListChangeClickListener : AdapterView.OnItemClickListener {
+
         override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
             val lText = _Citylist.get(position)
             val lQ = lText.get("q")
@@ -207,7 +220,8 @@ class changeActivity : AppCompatActivity() {
                 val urlFull = "$WEATHERINFO_URL&q=$lQ&appid=$APP_ID"
                 receiveWeatherInfo(urlFull)
             }
-            Log.i("${DEBUG_TAG}:Item","${lQ}")
+
+            SelectCangeColor(position,parent)
 
             // "DataStore"という名前でインスタンスを生成
             val sharedPref = getSharedPreferences(
@@ -219,6 +233,20 @@ class changeActivity : AppCompatActivity() {
             val editor = sharedPref.edit()
             editor.putString("q", "${lQ}")
             editor.apply()
+        }
+
+        // 色変更を行う処理
+        fun SelectCangeColor(position: Int, parent: ViewGroup) {
+            // 任意の初期値を代入
+            var i = INIT_NUM
+            // 都市分while文を回す
+            while (i <CITY_NUM) {// 都市リストの色を全て白にする
+                // 色を白にする
+                parent[i].setBackgroundColor(Color.WHITE)
+                i++ // 次に進める
+            }
+            // 押された場所の色を黄色にする
+            parent[position].setBackgroundColor(Color.YELLOW)
         }
     }
 

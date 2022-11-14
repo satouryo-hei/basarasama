@@ -57,7 +57,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="10dp"
             android:layout_marginTop="0dp"
             android:layout_weight="0.5"
             android:orientation="vertical">
@@ -71,16 +71,20 @@
 
             <ListView
                 android:id="@+id/lvWeather"
-                android:layout_width="wrap_content"
-                android:layout_height="196dp"
+                android:layout_width="match_parent"
+                android:layout_height="135dp"
+                android:textSize="20dp" />
+            <ListView
+                android:id="@+id/lvaWeather"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:textSize="20dp" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="0dp"
-            android:layout_weight="0.5"
+            android:layout_weight="0.1"
             android:orientation="horizontal">
 
             <Button

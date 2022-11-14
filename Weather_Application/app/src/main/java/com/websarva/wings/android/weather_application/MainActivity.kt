@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
                     // データ取得に使ってもよい時間。
                     it.readTimeout = TIMEOUT
                     // HTTP接続メソッドをGETに設定
-                    it.requestMethod
+                    it.requestMethod = "GET"
                     // 接続
                     it.connect()
                     // HttpURLConnectionオブジェクトからレスポンスデータを取得
@@ -153,7 +153,10 @@ class MainActivity : AppCompatActivity() {
         private val _result = result
 
         private lateinit var dcrCustomActivity: CustomActivity
-        private  var dcrAnimalList: ArrayList<HourlyWeather> = arrayListOf()
+        private var dcrHourlyList: ArrayList<HourlyWeather> = arrayListOf()
+
+        private lateinit var dcrDisplayActivity: DisplayActivity
+        private lateinit var dcrDisplayList: ArrayList<DisplayWeather>
 
         @UiThread
         override fun run() {
@@ -191,9 +194,18 @@ class MainActivity : AppCompatActivity() {
             // 現在の天気情報文字列を取得
             val lNowWeather = lWeatherIndex.getString("description")
             Log.i(DEBUG_TAG, "天気:${lNowWeather}")
-
             // 天気情報を表示
             lTvWeatherDesc.text = "現在は${lNowWeather}です。"
+
+            // 気温情報JSONオブジェクトを取得
+            val lMain = lListJSONArrayZero.getJSONObject("main")
+
+            // 気温情報文字列を取得、表示｛C(摂氏)＝K(ケルビン)-273｝
+            lTvTemp.text = "現在の気温：${lMain.getInt("temp") - KELVIN_DIFF}℃"
+            // 最低気温情報文字列を取得、表示｛C(摂氏)＝K(ケルビン)-273｝
+            lTvTempMin.text = "最低気温：${lMain.getInt("temp_min") - KELVIN_DIFF}℃"
+            // 最高気温情報文字列を取得、表示 ｛C(摂氏)＝K(ケルビン)-273｝
+            lTvTempMax.text = "最高気温：${lMain.getInt("temp_max") - KELVIN_DIFF}℃"
 
             // カウントように変数を作成(初期化)
             var rCountInt = INIT_NUM
@@ -223,34 +235,25 @@ class MainActivity : AppCompatActivity() {
                     val lHourlyWeather = HourlyWeather("${lWeather}","現在の天気",lTemp,
                         "現在の気温")
                     // dcrAnimalListに追加
-                    dcrAnimalList.add(lHourlyWeather)
-                    Log.i(DEBUG_TAG, "気温:${dcrAnimalList}")
+                    dcrHourlyList.add(lHourlyWeather)
+                    Log.i(DEBUG_TAG, "気温:${dcrHourlyList}")
                 }
                 else{
                     // 1時間ごとの天気情報と気温情報を取得
                     val lHourlyWeather = HourlyWeather("${lWeather}","${rCountInt}時間後の天気",
                         lTemp,"${rCountInt}時間後の気温")
-                    // dcrAnimalListに追加
-                    dcrAnimalList.add(lHourlyWeather)
-                    Log.i(DEBUG_TAG, "気温:${dcrAnimalList}")
+                    // dcrHourlyListに追加
+                    dcrHourlyList.add(lHourlyWeather)
+                    Log.i(DEBUG_TAG, "気温:${dcrHourlyList}")
                 }
 
                 // CustomAdapterの生成と設定
-                dcrCustomActivity = CustomActivity(this@MainActivity, dcrAnimalList)
+                dcrCustomActivity = CustomActivity(this@MainActivity, dcrHourlyList)
                 lLvWeatherList.adapter = dcrCustomActivity
 
                 // rCountInt+1をして次に進める
                 ++rCountInt
             }
-            // 気温情報JSONオブジェクトを取得
-            val lMain = lListJSONArrayZero.getJSONObject("main")
-
-            // 気温情報文字列を取得、表示｛C(摂氏)＝K(ケルビン)-273｝
-            lTvTemp.text = "現在の気温：${lMain.getInt("temp") - KELVIN_DIFF}℃"
-            // 最低気温情報文字列を取得、表示｛C(摂氏)＝K(ケルビン)-273｝
-            lTvTempMin.text = "最低気温：${lMain.getInt("temp_min") - KELVIN_DIFF}℃"
-            // 最高気温情報文字列を取得、表示 ｛C(摂氏)＝K(ケルビン)-273｝
-            lTvTempMax.text = "最高気温：${lMain.getInt("temp_max") - KELVIN_DIFF}℃"
         }
     }
 }

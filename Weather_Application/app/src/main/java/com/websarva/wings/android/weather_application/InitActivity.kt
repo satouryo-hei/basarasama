@@ -129,7 +129,7 @@ class InitActivity : AppCompatActivity() {
                     // データ取得に使ってもよい時間。
                     it.readTimeout = TIMEOUT
                     // HTTP接続メソッドをGETに設定
-                    it.requestMethod
+                    it.requestMethod = "GET"
                     // 接続
                     it.connect()
                     // HttpURLConnectionオブジェクトからレスポンスデータを取得

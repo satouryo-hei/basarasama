@@ -18,7 +18,7 @@ class CustomActivity(context: Context, var mHourlyWeatherList: List<HourlyWeathe
     private val layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        // Animalの取得
+        // mHourlyWeatherListの取得
         val lHourlyWeather = mHourlyWeatherList[position]
 
         // レイアウトの設定
