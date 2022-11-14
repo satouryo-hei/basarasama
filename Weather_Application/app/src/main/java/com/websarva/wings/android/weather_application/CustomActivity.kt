@@ -9,12 +9,6 @@ import android.widget.TextView
 
 class CustomActivity(context: Context, var mHourlyWeatherList: List<HourlyWeather>) : ArrayAdapter<HourlyWeather>(context, 0, mHourlyWeatherList) {
 
-    // クラス内のprivate定数を宣言するために
-    companion object {
-        // 摂氏へ変化するときの数
-        private const val KELVIN_DIFF = 273
-    }
-
     private val layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -35,7 +29,7 @@ class CustomActivity(context: Context, var mHourlyWeatherList: List<HourlyWeathe
         WeatherName?.text = lHourlyWeather.WeatherComment
 
         val TempInfo = view?.findViewById<TextView>(R.id.csTvTempInfo)
-        TempInfo?.text = "${lHourlyWeather.TempInfo-KELVIN_DIFF} ℃"
+        TempInfo?.text = "${lHourlyWeather.TempInfo} ℃"
 
         val TempName = view?.findViewById<TextView>(R.id.csTvTempComment)
         TempName?.text = lHourlyWeather.TempComment

@@ -40,8 +40,6 @@ class MainActivity : AppCompatActivity() {
         private const val TIMEOUT = 1000
         // 回す回数
         private const val WHILE_NUM = 11
-        // 摂氏へ変化するときの数
-        private const val KELVIN_DIFF = 273
     }
 
 
@@ -142,7 +140,7 @@ class MainActivity : AppCompatActivity() {
             Log.i(DEBUG_TAG,"${lLan}")
             Log.i(DEBUG_TAG,"${lLon}")
 
-            val urlFull = "$WEATHERINFO_URL&lat=${lLan}&lon=${lLon}&appid=$APP_ID"
+            val urlFull = "$WEATHERINFO_URL&lat=${lLan}&lon=${lLon}&appid=$APP_ID&units=metric"
             receiveWeatherInfo(urlFull)
         }
     }
@@ -154,9 +152,6 @@ class MainActivity : AppCompatActivity() {
 
         private lateinit var dcrCustomActivity: CustomActivity
         private var dcrHourlyList: ArrayList<HourlyWeather> = arrayListOf()
-
-        private lateinit var dcrDisplayActivity: DisplayActivity
-        private lateinit var dcrDisplayList: ArrayList<DisplayWeather>
 
         @UiThread
         override fun run() {
@@ -200,12 +195,12 @@ class MainActivity : AppCompatActivity() {
             // 気温情報JSONオブジェクトを取得
             val lMain = lListJSONArrayZero.getJSONObject("main")
 
-            // 気温情報文字列を取得、表示｛C(摂氏)＝K(ケルビン)-273｝
-            lTvTemp.text = "現在の気温：${lMain.getInt("temp") - KELVIN_DIFF}℃"
+            // 気温情報文字列を取得、表示｛C(摂氏)＝K(ケルビン)-273｝units=metric
+            lTvTemp.text = "現在の気温：${lMain.getInt("temp")}℃"
             // 最低気温情報文字列を取得、表示｛C(摂氏)＝K(ケルビン)-273｝
-            lTvTempMin.text = "最低気温：${lMain.getInt("temp_min") - KELVIN_DIFF}℃"
+            lTvTempMin.text = "最低気温：${lMain.getInt("temp_min")}℃"
             // 最高気温情報文字列を取得、表示 ｛C(摂氏)＝K(ケルビン)-273｝
-            lTvTempMax.text = "最高気温：${lMain.getInt("temp_max") - KELVIN_DIFF}℃"
+            lTvTempMax.text = "最高気温：${lMain.getInt("temp_max")}℃"
 
             // カウントように変数を作成(初期化)
             var rCountInt = INIT_NUM
