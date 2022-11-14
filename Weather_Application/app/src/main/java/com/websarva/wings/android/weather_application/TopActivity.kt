@@ -24,7 +24,7 @@ import java.net.URL
 import java.util.concurrent.Executors
 
 class TopActivity : AppCompatActivity(){
-    lateinit var a : changeActivity
+
     // クラス内のprivate定数を宣言するために
     companion object {
         // ログに記載するタグ用の文字列

@@ -50,7 +50,7 @@ class InitActivity : AppCompatActivity() {
         val lSharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
 
         // "Input"から読み出す
-        if((lSharedPref.getBoolean("first", false)))
+        if(lSharedPref.getBoolean("first", false))
        {
            val intent = Intent(this@InitActivity, MainActivity::class.java)
            startActivity(intent)
@@ -187,7 +187,7 @@ class InitActivity : AppCompatActivity() {
                 Context.MODE_PRIVATE
             )
 
-            // 文字列を"Input"に書き込む
+            // 文字列を書き込む
             val editor = sharedPref.edit()
             editor.putString("CityName", "${lCityName}")
             Log.i(DEBUG_TAG,"都市の名前:${lCityName}")

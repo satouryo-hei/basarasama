@@ -196,7 +196,7 @@ class changeActivity : AppCompatActivity() {
                 Context.MODE_PRIVATE
             )
 
-            // 文字列を"Input"に書き込む
+            // 文字列を書き込む
             val editor = lSharedPref.edit()
             editor.putString("CityName", "${lCityName}")
             Log.i(DEBUG_TAG,"都市の名前:${lCityName}")
