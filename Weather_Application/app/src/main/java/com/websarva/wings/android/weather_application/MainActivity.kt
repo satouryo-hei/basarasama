@@ -197,9 +197,9 @@ class MainActivity : AppCompatActivity() {
 
             // 気温情報文字列を取得、表示｛C(摂氏)＝K(ケルビン)-273｝units=metric
             lTvTemp.text = "現在の気温：${lMain.getInt("temp")}℃"
-            // 最低気温情報文字列を取得、表示｛C(摂氏)＝K(ケルビン)-273｝
+            // 最低気温情報文字列を取得、表示｛C(摂氏)＝K(ケルビン)-273｝units=metric
             lTvTempMin.text = "最低気温：${lMain.getInt("temp_min")}℃"
-            // 最高気温情報文字列を取得、表示 ｛C(摂氏)＝K(ケルビン)-273｝
+            // 最高気温情報文字列を取得、表示 ｛C(摂氏)＝K(ケルビン)-273｝units=metric
             lTvTempMax.text = "最高気温：${lMain.getInt("temp_max")}℃"
 
             // カウントように変数を作成(初期化)
